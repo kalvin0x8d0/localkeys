@@ -77,11 +77,17 @@ func apiNostrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiJwtHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: Call your updated generateJWT() function here
-	resp := jwtResponse{
-		Base64: "...",
-		Hex:    "...",
+	b64, hexStr, err := generateJWT()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	resp := jwtResponse{
+		Base64: b64,
+		Hex:    hexStr,
+	}
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
