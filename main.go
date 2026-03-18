@@ -120,10 +120,16 @@ func apiHashHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Call your updated generateHash(req.Password) function here
-	resp := hashResponse{
-		PHC: "$argon2id$v=19$...",
+	phc, err := generateHash(req.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	resp := hashResponse{
+		PHC: phc,
+	}
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
