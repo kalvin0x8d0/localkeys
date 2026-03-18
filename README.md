@@ -83,3 +83,20 @@ Commands:
 ## Licence
 
 Do whatever you want with this. CC0 / public domain.
+
+---
+
+### Upcoming
+
+```
+localkeys-web/
+├── main.go              # Starts the HTTP server and defines API routes
+├── api.go               # Adapts your existing crypto logic into HTTP JSON handlers
+├── nostr.go             # (Reused) Generates secp256k1 Nostr keys [cite: 9]
+├── jwt.go               # (Reused) Generates 256-bit JWT secrets [cite: 10]
+├── sshgen.go            # (Reused) Generates Ed25519 SSH keys 
+├── hash.go              # (Reused) Handles Argon2id hashing [cite: 12]
+├── go.mod               # Go module definition 
+└── static/
+    └── index.html       # The Material You UI containing the frontend code
+```
