@@ -93,11 +93,17 @@ func apiJwtHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiSshHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: Call your updated generateSSH() function here
-	resp := sshResponse{
-		PrivateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----",
-		PublicKey:  "ssh-ed25519 ...",
+	privKey, pubKey, err := generateSSH()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	resp := sshResponse{
+		PrivateKey: privKey,
+		PublicKey:  pubKey,
+	}
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
