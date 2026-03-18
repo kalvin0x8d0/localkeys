@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>localkeys</title>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.11/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.11/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <style>
+        body { padding-top: 2rem; max-width: 900px; margin: 0 auto; }
+        .page { display: none; padding: 2rem 0; }
+        .page.active { display: block; }
+        .output-box { font-family: monospace; word-break: break-all; white-space: pre-wrap; }
+    </style>
+</head>
+<body class="light">
+
+    <header class="primary-container padding round">
+        <h4 class="margin-none">localkeys</h4>
+        <p class="margin-none opacity-75">Local Cryptographic Key Utility</p>
+    </header>
+
+    <nav class="margin-top">
+        <button class="active" onclick="showPage('nostr')">Nostr</button>
+        <button onclick="showPage('jwt')">JWT Secret</button>
+        <button onclick="showPage('ssh')">SSH Key</button>
+        <button onclick="showPage('hash')">Argon2id Hash</button>
+    </nav>
+
+    <main>
+        <article id="nostr" class="page active">
+            <h5>Nostr Keypair</h5>
+            <p>Generate a secp256k1 private key and derive the public key.</p>
+            <button class="primary" onclick="generateNostr()">Generate Keys</button>
+            
+            <div id="nostr-output" class="margin-top" style="display: none;">
+                <div class="field textarea border">
+                    <textarea class="output-box" id="nostr-priv" readonly></textarea>
+                    <label>Private Key (Hex)</label>
+                </div>
+                <div class="field textarea border">
+                    <textarea class="output-box" id="nostr-nsec" readonly></textarea>
+                    <label>nsec (NIP-19)</label>
+                </div>
+                <div class="field textarea border">
+                    <textarea class="output-box" id="nostr-pub" readonly></textarea>
+                    <label>Public Key (Hex)</label>
+                </div>
+                <div class="field textarea border">
+                    <textarea class="output-box" id="nostr-npub" readonly></textarea>
+                    <label>npub (NIP-19)</label>
+                </div>
+            </div>
+        </article>
+
+        <article id="jwt" class="page">
+            <h5>JWT Secret (HS256)</h5>
+            <p>Generate a random 256-bit secret for HMAC-SHA256 signing.</p>
+            <button class="primary" onclick="generateJWT()">Generate Secret</button>
+
+            <div id="jwt-output" class="margin-top" style="display: none;">
+                <div class="field textarea border">
+                    <textarea class="output-box" id="jwt-base64" readonly></textarea>
+                    <label>Base64</label>
+                </div>
+                <div class="field textarea border">
+                    <textarea class="output-box" id="jwt-hex" readonly></textarea>
+                    <label>Hex</label>
+                </div>
+            </div>
+        </article>
+
+        <article id="ssh" class="page">
+            <h5>Ed25519 SSH Keypair</h5>
+            <p>Generate an Ed25519 SSH keypair.</p>
+            <button class="primary" onclick="generateSSH()">Generate SSH Keys</button>
+
+            <div id="ssh-output" class="margin-top" style="display: none;">
+                <div class="field textarea border">
+                    <textarea class="output-box" id="ssh-priv" rows="6" readonly></textarea>
+                    <label>Private Key (OpenSSH PEM)</label>
+                </div>
+                <div class="field textarea border">
+                    <textarea class="output-box" id="ssh-pub" readonly></textarea>
+                    <label>Public Key</label>
+                </div>
+            </div>
+        </article>
+
+        <article id="hash" class="page">
+            <h5>Argon2id Password Hash</h5>
+            <p>Hash a password using OWASP-recommended defaults.</p>
+            <div class="field border">
+                <input type="password" id="hash-input" placeholder="Enter password">
+                <label>Password</label>
+            </div>
+            <button class="primary margin-top" onclick="generateHash()">Hash Password</button>
+
+            <div id="hash-output" class="margin-top" style="display: none;">
+                <div class="field textarea border">
+                    <textarea class="output-box" id="hash-phc" readonly></textarea>
+                    <label>PHC Format Hash</label>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script>
+        // Tab switching logic
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // API Call Functions
+        async function generateNostr() {
+            const res = await fetch('/api/nostr');
+            const data = await res.json();
+            document.getElementById('nostr-priv').value = data.privHex;
+            document.getElementById('nostr-pub').value = data.pubHex;
+            document.getElementById('nostr-nsec').value = data.nsec;
+            document.getElementById('nostr-npub').value = data.npub;
+            document.getElementById('nostr-output').style.display = 'block';
+        }
+
+        async function generateJWT() {
+            const res = await fetch('/api/jwt');
+            const data = await res.json();
+            document.getElementById('jwt-base64').value = data.base64;
+            document.getElementById('jwt-hex').value = data.hex;
+            document.getElementById('jwt-output').style.display = 'block';
+        }
+
+        async function generateSSH() {
+            const res = await fetch('/api/ssh');
+            const data = await res.json();
+            document.getElementById('ssh-priv').value = data.privateKey;
+            document.getElementById('ssh-pub').value = data.publicKey;
+            document.getElementById('ssh-output').style.display = 'block';
+        }
+
+        async function generateHash() {
+            const password = document.getElementById('hash-input').value;
+            if (!password) {
+                alert("Please enter a password first.");
+                return;
+            }
+            const res = await fetch('/api/hash', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            });
+            const data = await res.json();
+            document.getElementById('hash-phc').value = data.phc;
+            document.getElementById('hash-output').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
