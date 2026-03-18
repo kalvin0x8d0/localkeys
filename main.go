@@ -1,59 +1,117 @@
 package main
 
 import (
+	"embed"
+	"encoding/json"
 	"fmt"
-	"os"
-	"strings"
+	"io/fs"
+	"log"
+	"net/http"
 )
 
-// localkeys — a local cryptographic key utility.
-// Generates Nostr keypairs, JWT secrets, SSH keys, and password hashes.
-// No network calls. Everything stays on your machine.
+//go:embed static/*
+var staticFiles embed.FS
 
-func main() {
-	if len(os.Args) < 2 {
-		printUsage()
-		os.Exit(0)
-	}
-
-	// Route to the correct subcommand.
-	command := strings.ToLower(os.Args[1])
-
-	switch command {
-	case "nostr":
-		handleNostr()
-	case "jwt":
-		handleJWT()
-	case "ssh":
-		handleSSH()
-	case "hash":
-		handleHash(os.Args[2:])
-	case "help", "-h", "--help":
-		printUsage()
-	default:
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n\n", command)
-		printUsage()
-		os.Exit(1)
-	}
+// Define the data structures for our API responses
+type nostrResponse struct {
+	PrivHex string `json:"privHex"`
+	PubHex  string `json:"pubHex"`
+	NSec    string `json:"nsec"`
+	NPub    string `json:"npub"`
 }
 
-// printUsage prints the available subcommands.
-func printUsage() {
-	fmt.Println("localkeys — local cryptographic key utility")
-	fmt.Println()
-	fmt.Println("Usage:")
-	fmt.Println("  localkeys <command> [options]")
-	fmt.Println()
-	fmt.Println("Commands:")
-	fmt.Println("  nostr    Generate a Nostr keypair (hex + NIP-19 nsec/npub)")
-	fmt.Println("  jwt      Generate a random JWT signing secret (base64)")
-	fmt.Println("  ssh      Generate an Ed25519 SSH keypair")
-	fmt.Println("  hash     Hash a password with Argon2id")
-	fmt.Println()
-	fmt.Println("Examples:")
-	fmt.Println("  localkeys nostr")
-	fmt.Println("  localkeys jwt")
-	fmt.Println("  localkeys ssh")
-	fmt.Println("  localkeys hash mypassword")
-	fmt.Println("  localkeys hash   (prompts for password)")
+type jwtResponse struct {
+	Base64 string `json:"base64"`
+	Hex    string `json:"hex"`
+}
+
+type sshResponse struct {
+	PrivateKey string `json:"privateKey"`
+	PublicKey  string `json:"publicKey"`
+}
+
+type hashRequest struct {
+	Password string `json:"password"`
+}
+
+type hashResponse struct {
+	PHC string `json:"phc"`
+}
+
+func main() {
+	// 1. Define API Endpoints
+	http.HandleFunc("/api/nostr", apiNostrHandler)
+	http.HandleFunc("/api/jwt", apiJwtHandler)
+	http.HandleFunc("/api/ssh", apiSshHandler)
+	http.HandleFunc("/api/hash", apiHashHandler)
+
+	// 2. Serve the Material You frontend from the embedded 'static' folder
+	subFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Fatal("Failed to load static files: ", err)
+	}
+	http.Handle("/", http.FileServer(http.FS(subFS)))
+
+	// 3. Start the server
+	port := "8080"
+	fmt.Printf("Starting localkeys web interface on http://localhost:%s\n", port)
+	fmt.Println("Press Ctrl+C to stop.")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+// --- API Handlers ---
+// These handlers will call your existing cryptography functions once we update them
+// to return strings instead of printing to the terminal.
+
+func apiNostrHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO: Call your updated generateNostr() function here
+	// For now, we return a placeholder response
+	resp := nostrResponse{
+		PrivHex: "...",
+		PubHex:  "...",
+		NSec:    "...",
+		NPub:    "...",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func apiJwtHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO: Call your updated generateJWT() function here
+	resp := jwtResponse{
+		Base64: "...",
+		Hex:    "...",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func apiSshHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO: Call your updated generateSSH() function here
+	resp := sshResponse{
+		PrivateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----",
+		PublicKey:  "ssh-ed25519 ...",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func apiHashHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req hashRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// TODO: Call your updated generateHash(req.Password) function here
+	resp := hashResponse{
+		PHC: "$argon2id$v=19$...",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }
