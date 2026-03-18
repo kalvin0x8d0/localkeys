@@ -1,0 +1,18 @@
+services:
+  localkeys:
+    build: .
+    container_name: localkeys
+    volumes:
+      # Mount a local directory to collect generated key files (SSH keys, etc).
+      - ./output:/output
+    # Override CMD with the subcommand you want to run.
+    # Examples:
+    #   docker compose run --rm localkeys nostr
+    #   docker compose run --rm localkeys jwt
+    #   docker compose run --rm localkeys ssh
+    #   docker compose run --rm localkeys hash mypassword
+    #
+    # For interactive password input (hash without argument):
+    #   docker compose run --rm -it localkeys hash
+    stdin_open: true
+    tty: true
