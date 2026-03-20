@@ -22,10 +22,10 @@
     </header>
 
     <nav class="margin-top">
-        <button class="active" onclick="showPage('nostr')">Nostr</button>
-        <button onclick="showPage('jwt')">JWT Secret</button>
-        <button onclick="showPage('ssh')">SSH Key</button>
-        <button onclick="showPage('hash')">Argon2id Hash</button>
+        <button class="active" onclick="showPage('nostr', this)">Nostr</button>
+        <button onclick="showPage('jwt', this)">JWT Secret</button>
+        <button onclick="showPage('ssh', this)">SSH Key</button>
+        <button onclick="showPage('hash', this)">Argon2id Hash</button>
     </nav>
 
     <main>
@@ -33,7 +33,7 @@
             <h5>Nostr Keypair</h5>
             <p>Generate a secp256k1 private key and derive the public key.</p>
             <button class="primary" onclick="generateNostr()">Generate Keys</button>
-            
+
             <div id="nostr-output" class="margin-top" style="display: none;">
                 <div class="field textarea border">
                     <textarea class="output-box" id="nostr-priv" readonly></textarea>
@@ -107,55 +107,73 @@
     </main>
 
     <script>
-        // Tab switching logic
-        function showPage(pageId) {
+        function showPage(pageId, btn) {
             document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            btn.classList.add('active');
         }
 
-        // API Call Functions
         async function generateNostr() {
-            const res = await fetch('/api/nostr');
-            const data = await res.json();
-            document.getElementById('nostr-priv').value = data.privHex;
-            document.getElementById('nostr-pub').value = data.pubHex;
-            document.getElementById('nostr-nsec').value = data.nsec;
-            document.getElementById('nostr-npub').value = data.npub;
-            document.getElementById('nostr-output').style.display = 'block';
+            try {
+                const res = await fetch('/api/nostr');
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                document.getElementById('nostr-priv').value = data.privHex;
+                document.getElementById('nostr-pub').value = data.pubHex;
+                document.getElementById('nostr-nsec').value = data.nsec;
+                document.getElementById('nostr-npub').value = data.npub;
+                document.getElementById('nostr-output').style.display = 'block';
+            } catch (err) {
+                alert('Error generating Nostr keypair: ' + err.message);
+            }
         }
 
         async function generateJWT() {
-            const res = await fetch('/api/jwt');
-            const data = await res.json();
-            document.getElementById('jwt-base64').value = data.base64;
-            document.getElementById('jwt-hex').value = data.hex;
-            document.getElementById('jwt-output').style.display = 'block';
+            try {
+                const res = await fetch('/api/jwt');
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                document.getElementById('jwt-base64').value = data.base64;
+                document.getElementById('jwt-hex').value = data.hex;
+                document.getElementById('jwt-output').style.display = 'block';
+            } catch (err) {
+                alert('Error generating JWT secret: ' + err.message);
+            }
         }
 
         async function generateSSH() {
-            const res = await fetch('/api/ssh');
-            const data = await res.json();
-            document.getElementById('ssh-priv').value = data.privateKey;
-            document.getElementById('ssh-pub').value = data.publicKey;
-            document.getElementById('ssh-output').style.display = 'block';
+            try {
+                const res = await fetch('/api/ssh');
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                document.getElementById('ssh-priv').value = data.privateKey;
+                document.getElementById('ssh-pub').value = data.publicKey;
+                document.getElementById('ssh-output').style.display = 'block';
+            } catch (err) {
+                alert('Error generating SSH keypair: ' + err.message);
+            }
         }
 
         async function generateHash() {
             const password = document.getElementById('hash-input').value;
             if (!password) {
-                alert("Please enter a password first.");
+                alert('Please enter a password first.');
                 return;
             }
-            const res = await fetch('/api/hash', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: password })
-            });
-            const data = await res.json();
-            document.getElementById('hash-phc').value = data.phc;
-            document.getElementById('hash-output').style.display = 'block';
+            try {
+                const res = await fetch('/api/hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                document.getElementById('hash-phc').value = data.phc;
+                document.getElementById('hash-output').style.display = 'block';
+            } catch (err) {
+                alert('Error hashing password: ' + err.message);
+            }
         }
     </script>
 </body>

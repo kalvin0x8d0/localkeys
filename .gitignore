@@ -8,6 +8,9 @@ id_ed25519_localkeys.pub
 # Output directory
 output/
 
+# Environment
+.env
+
 # IDE
 .vscode/
 .idea/

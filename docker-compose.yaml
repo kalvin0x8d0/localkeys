@@ -3,7 +3,10 @@ services:
     build: .
     container_name: localkeys-web
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:${PORT:-8080}"
+    environment:
+      - PORT=${PORT:-8080}
+    env_file:
+      - path: .env
+        required: false
     restart: unless-stopped
-    # We no longer need volume mounts or interactive TTY 
-    # since everything is handled via the web browser.
