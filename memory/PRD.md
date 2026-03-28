@@ -28,12 +28,13 @@ Rebuild the original Go-based `localkeys` app (which did server-side crypto) as 
 ## What's Been Implemented (2026-03-28)
 - [x] Complete React SPA with dark "Control Room" theme
 - [x] Header with Zero Knowledge badge (yellow, ShieldCheck icon)
-- [x] 4-tab interface: Nostr / JWT Secret / SSH Key / Argon2id
+- [x] 5-tab interface: Nostr / JWT Secret / SSH Key / Argon2id / Password
 - [x] NostrTool: client-side secp256k1 via nostr-tools (nsec1/npub1 + hex)
 - [x] JWTTool: Web Crypto API getRandomValues() → Base64 + Hex
 - [x] SSHTool: tweetnacl Ed25519 + manual OpenSSH PEM format serialisation
 - [x] ArgonTool: hash-wasm WASM argon2id, configurable memory/iterations/parallelism, PHC output
-- [x] OutputField component with copy-to-clipboard + sonner toast
+- [x] PasswordTool: crypto.getRandomValues() password gen, 3 charset checkboxes (letters/numbers/symbols), configurable length
+- [x] OutputField component with copy-to-clipboard + sonner toast (with error fallback)
 - [x] JetBrains Mono for key outputs, Outfit for UI
 - [x] Subtle background texture (3% opacity)
 - [x] Footer with "no server transmission" message

@@ -8,12 +8,21 @@ export default function OutputField({ label, value, mono = true, rows = 3, testI
 
   const handleCopy = async () => {
     if (!value) return;
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    toast('Copied to clipboard', {
-      style: { background: '#0A0A0A', border: '1px solid #1F1F1F', color: '#fff' },
-    });
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast('Copied to clipboard', {
+        style: { background: '#0A0A0A', border: '1px solid #1F1F1F', color: '#fff' },
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: select text for manual copy
+      const el = document.querySelector(`[data-testid="${testId}"]`);
+      if (el) { el.select(); }
+      toast('Press Ctrl+C to copy', {
+        style: { background: '#0A0A0A', border: '1px solid #1F1F1F', color: '#fff' },
+      });
+    }
   };
 
   return (
