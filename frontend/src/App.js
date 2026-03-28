@@ -5,13 +5,15 @@ import NostrTool from '@/components/NostrTool';
 import JWTTool from '@/components/JWTTool';
 import SSHTool from '@/components/SSHTool';
 import ArgonTool from '@/components/ArgonTool';
+import PasswordTool from '@/components/PasswordTool';
 import './App.css';
 
 const TABS = [
-  { value: 'nostr', label: 'Nostr' },
-  { value: 'jwt',   label: 'JWT Secret' },
-  { value: 'ssh',   label: 'SSH Key' },
-  { value: 'argon', label: 'Argon2id' },
+  { value: 'nostr',    label: 'Nostr' },
+  { value: 'jwt',      label: 'JWT Secret' },
+  { value: 'ssh',      label: 'SSH Key' },
+  { value: 'argon',    label: 'Argon2id' },
+  { value: 'password', label: 'Password' },
 ];
 
 export default function App() {
@@ -83,6 +85,7 @@ export default function App() {
           <TabsContent value="jwt"><JWTTool /></TabsContent>
           <TabsContent value="ssh"><SSHTool /></TabsContent>
           <TabsContent value="argon"><ArgonTool /></TabsContent>
+          <TabsContent value="password"><PasswordTool /></TabsContent>
         </Tabs>
       </main>
 
