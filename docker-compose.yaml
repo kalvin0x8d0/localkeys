@@ -4,7 +4,8 @@ services:
     image: mongo:7.0
     container_name: localkeys_mongodb
     ports:
-      - "27017:27017"
+      # Maps HOST_PORT:CONTAINER_PORT
+      - "${MONGODB_PORT:-27017}:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -27,11 +28,11 @@ services:
       dockerfile: Dockerfile
     container_name: localkeys_backend
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       MONGO_URL: mongodb://admin:password@mongodb:27017/localkeys?authSource=admin
       DB_NAME: localkeys
-      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       HOST: 0.0.0.0
       PORT: 8000
       LOG_LEVEL: INFO
@@ -49,18 +50,18 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # Passes the API URL to React during the build phase
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8000}
     container_name: localkeys_frontend
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8000
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8000}
     depends_on:
       - backend
     networks:
       - localkeys_network
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
 
 volumes:
   mongo_data:
