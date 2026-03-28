@@ -2,6 +2,10 @@
 
 A modern, zero-knowledge cryptographic application built with React, FastAPI, and MongoDB. LocalKeys provides secure, client-side key management and cryptographic operations with a sleek brutalist UI.
 
+<a href="http://creativecommons.org/publicdomain/zero/1.0/" title="CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"><img src="https://licensebuttons.net/l/zero/1.0/80x15.png" width="80" height="15" alt="CC0 1.0 Universal (CC0 1.0) Public Domain Dedication"></a>
+
+<a href="https://www.aihonestybadge.com" target="_blank" rel="noopener"><img src="https://www.aihonestybadge.com/badges/ai-generated.svg" alt="AI Generated Badge" style="max-width: 190px; height: auto;" /></a>
+
 ## Features
 
 - **Zero-Knowledge Architecture**: All cryptographic operations happen client-side. The server never sees sensitive data.
